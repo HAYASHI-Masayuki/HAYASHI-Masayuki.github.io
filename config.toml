@@ -1,4 +1,5 @@
 baseURL = "http://example.org/"
-languageCode = "en-us"
-title = "My New Hugo Site"
+defaultContentLanguage = "ja"
+languageCode = "ja"
 theme = "mainroad"
+title = "表現と向上"
