@@ -1,5 +1,29 @@
 baseURL = "http://example.org/"
 defaultContentLanguage = "ja"
+enableGitInfo = true
+hasCJKLanguage = true
 languageCode = "ja"
 theme = "mainroad"
 title = "表現と向上"
+
+[Params]
+copyright = "HAYASHI Masayuki"
+opengraph = true
+twitter_cards = true
+toc = true
+pager = true
+post_meta = ["date", "categories"]
+dateformat = "2006/01/02"
+
+[Params.style.vars]
+highlightColor = "#66cccc"
+
+[Params.sidebar]
+home = "right"
+list = "right"
+single = "right"
+widgets = ["ddg-search", "recent", "categories", "taglist"]
+
+[Params.widgets.social]
+github = "HAYASHI-Masayuki"
+email = "masayuki.hayashi.mcc@gmail.com"
