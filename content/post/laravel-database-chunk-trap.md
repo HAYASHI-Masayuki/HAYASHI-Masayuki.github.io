@@ -23,7 +23,7 @@ Laravelでデータベースにある大量の行を処理する場合、すべ�
 
 ### どういう罠があるのか
 
-具体的にどういう罠があるかですが、まず公式ドキュメントにも書かれているように、取得しつつ更新する場合に、想定した行を処理できない罠があります。
+具体的にどういう罠があるかですが、まず公式ドキュメントにも書かれているように、取得しつつ更新する場合に、想定した行を処理できない場合があります。
 
 [データベース：クエリビルダ 9.x Laravel](https://readouble.com/laravel/9.x/ja/queries.html#chunking-results)
 
@@ -126,6 +126,14 @@ select * from `users` order by `users`.`id` asc limit 1000 offset 0
     <td style="text-align: center">×</td>
     <td style="text-align: center">○</td>
   </tr>
+  <tr>
+    <td style="text-align: center">何回目に取得されるか</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">1(実際は取得されない)</td>
+  </tr>
 </table>
 <!--
 | id         | 1   | 2   | 3   | 4   | 5   |
@@ -149,10 +157,10 @@ User::chunkById(1000, function () {  })
 上記のように`chunkById()`を使った場合のクエリは、以下のようになります。
 
 ```sql
--- 1回目は、
+-- 1回目
 select * from `users` order by `id` asc limit 1000;
 
--- 2回目は、
+-- 2回目
 select * from `users` where `id` > 1000 order by `id` asc limit 1000;
 ```
 
