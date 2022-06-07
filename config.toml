@@ -14,7 +14,6 @@ toc = true
 pager = true
 post_meta = ['date', 'categories']
 dateformat = '2006/01/02'
-customCss = ['css/custom.css']
 
 [Params.style.vars]
 highlightColor = '#66cccc'
