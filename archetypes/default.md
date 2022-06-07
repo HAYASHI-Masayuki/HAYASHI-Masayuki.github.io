@@ -4,3 +4,8 @@ date: {{ .Date }}
 draft: true
 ---
 
+
+
+{{< license >}}
+
+

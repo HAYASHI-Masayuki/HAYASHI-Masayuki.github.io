@@ -1,6 +1,7 @@
 ---
 title: "Laravelのデータベースのchunk()の罠"
 date: 2021-09-21T10:15:14+09:00
+publishDate: 2022-06-07
 draft: false
 ---
 
@@ -351,7 +352,9 @@ foreach (User::where(...)->lazyById() as $user) {
 [Laravelで気軽にバルクアップデートしたい - Qiita](https://qiita.com/HAYASHI-Masayuki/items/eec7e85eb8835ee8c96f)
 
 
+{{< license >}}
+
+
 [^cursor]: `cursor()`は単純にジェネレータで`PDOStatement::fetch()`しているだけのようで、実際には分割されておらずメモリ消費があまり減らなかったり、それを防ぐために設定を変えた場合は処理が終了するまで同じコネクションで別のクエリを実行できなかったり、癖が強いようなので私は使用していません。
 参考: [Laravelのcursorとchunkの違いとバッファクエリの対処法 - honeplusのメモ帳](http://honeplus.blog50.fc2.com/blog-entry-219.html)
-
 
