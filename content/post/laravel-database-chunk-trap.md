@@ -56,21 +56,81 @@ select * from `users` order by `users`.`id` asc limit 1000 offset 0
 
 ### 罠1: 取得しつつ更新する場合
 
+<table>
+  <tr>
+    <th style="width: 25%">id</th>
+    <th style="width: 15%">1</th>
+    <th style="width: 15%">2</th>
+    <th style="width: 15%">3</th>
+    <th style="width: 15%">4</th>
+    <th style="width: 15%">5</th>
+  </tr>
+  <tr>
+    <td style="text-align: center">取得対象か</td>
+    <td style="text-align: center">○</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">○</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">○</td>
+  </tr>
+</table>
+<!--
 | id         | 1   | 2   | 3   | 4   | 5   |
 | :-:        | :-: | :-: | :-: | :-: | :-: |
 | 取得対象か | ○  | ×  | ○  | ×  | ○  |
+-->
 
 上記のようなデータがある場合に、取得対象のものを2つずつ処理するとします。順当に行けば最初に1, 3を、次に5が処理されて完了となります。
 
-| id                   | 1   | 3   | 5   |
-| :-:                  | :-: | :-: | :-: |
-| 何回目に取得されるか | 1   | 1   | 2   |
+<table>
+  <tr>
+    <th style="width: 25%">id</th>
+    <th style="width: 15%">1</th>
+    <th style="width: 15%">2</th>
+    <th style="width: 15%">3</th>
+    <th style="width: 15%">4</th>
+    <th style="width: 15%">5</th>
+  </tr>
+  <tr>
+    <td style="text-align: center">何回目に取得されるか</td>
+    <td style="text-align: center">1</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">1</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">2</td>
+  </tr>
+</table>
+<!--
+| id                   | 1   | 2   | 3   | 4   | 5   |
+| :-:                  | :-: | :-: | :-: | :-: | :-: |
+| 何回目に取得されるか | 1   | -   | 1   | -   | 2   |
+-->
 
 しかし、1, 3を取得した後に、これらが取得対象とならなくなるような変更を行った場合はどうなるでしょうか。
 
+<table>
+  <tr>
+    <th style="width: 25%">id</th>
+    <th style="width: 15%">1</th>
+    <th style="width: 15%">2</th>
+    <th style="width: 15%">3</th>
+    <th style="width: 15%">4</th>
+    <th style="width: 15%">5</th>
+  </tr>
+  <tr>
+    <td style="text-align: center">取得対象か</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">○</td>
+  </tr>
+</table>
+<!--
 | id         | 1   | 2   | 3   | 4   | 5   |
 | :-:        | :-: | :-: | :-: | :-: | :-: |
 | 取得対象か | ×  | ×  | ×  |× | ○  |
+-->
 
 2回目の処理では、`OFFSET 2`, `LIMIT 2`として処理されるため、`id = 5`は取得されないまま処理全体が終了してしまいます。
 
@@ -106,26 +166,110 @@ select * from `users` where `id` > 1000 order by `id` asc limit 1000;
 
 ロックせずにチャンクの処理をすると、各チャンクの処理の間に、取得対象の行が増減する可能性があります。それにより、全処理の間に同じ行が2回取得されたり、逆にずっと取得対象だったのに一度も取得されない、ということがありえます。
 
+<table>
+  <tr>
+    <th style="width: 25%">id</th>
+    <th style="width: 15%">1</th>
+    <th style="width: 15%">2</th>
+    <th style="width: 15%">3</th>
+    <th style="width: 15%">4</th>
+    <th style="width: 15%">5</th>
+  </tr>
+  <tr>
+    <td style="text-align: center">取得対象か</td>
+    <td style="text-align: center">○</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">○</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">○</td>
+  </tr>
+  <tr>
+    <td style="text-align: center">何回目に取得されるか</td>
+    <td style="text-align: center">1</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">1</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">2(予定)</td>
+  </tr>
+</table>
+<!--
 | id                   | 1   | 2   | 3   | 4   | 5       |
 | :-:                  | :-: | :-: | :-: | :-: | :-:     |
 | 取得対象か           | ○  | ×  | ○  | ×  | ○      |
 | 何回目に取得されるか | 1   | -   | 1   | -   | 2(予定) |
+-->
 
 1, 3が取得された後、2が別のトランザクションから取得対象になるような変更をされた場合、
 
+<table>
+  <tr>
+    <th style="width: 25%">id</th>
+    <th style="width: 15%">1</th>
+    <th style="width: 15%">2</th>
+    <th style="width: 15%">3</th>
+    <th style="width: 15%">4</th>
+    <th style="width: 15%">5</th>
+  </tr>
+  <tr>
+    <td style="text-align: center">取得対象か</td>
+    <td style="text-align: center">○</td>
+    <td style="text-align: center">○</td>
+    <td style="text-align: center">○</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">○</td>
+  </tr>
+  <tr>
+    <td style="text-align: center">何回目に取得されるか</td>
+    <td style="text-align: center">1</td>
+    <td style="text-align: center">1(実際は取得されていない)</td>
+    <td style="text-align: center">2</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">2</td>
+  </tr>
+</table>
+<!--
 | id                   | 1   | 2                         | 3   | 4   | 5   |
 | :-:                  | :-: | :-:                       | :-: | :-: | :-: |
 | 取得対象か           | ○  | ○                        | ○  | ×  | ○  |
 | 何回目に取得されるか | 1   | 1(実際は取得されていない) | 2   | -   | 2   |
+-->
 
 3が、1回目と2回目のどちらでも取得されることになります。
 
 あるいは1, 3が取得された後、1が別のトランザクションから取得対象にならないような変更をされた場合、
 
+<table>
+  <tr>
+    <th style="width: 25%">id</th>
+    <th style="width: 15%">1</th>
+    <th style="width: 15%">2</th>
+    <th style="width: 15%">3</th>
+    <th style="width: 15%">4</th>
+    <th style="width: 15%">5</th>
+  </tr>
+  <tr>
+    <td style="text-align: center">取得対象か</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">○</td>
+    <td style="text-align: center">×</td>
+    <td style="text-align: center">○</td>
+  </tr>
+  <tr>
+    <td style="text-align: center">何回目に取得されるか</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">1</td>
+    <td style="text-align: center">-</td>
+    <td style="text-align: center">1(実際は取得されていない)</td>
+  </tr>
+</table>
+<!--
 | id                   | 1   | 2   | 3   | 4   | 5                         |
 | :-:                  | :-: | :-: | :-: | :-: | :-:                       |
 | 取得対象か           | ×  | ×  | ○  | ×  | ○                        |
 | 何回目に取得されるか | -   | -   | 1   | -   | 1(実際は取得されていない) |
+-->
 
 となり、5は1回目の取得済みと判断され、2回目に取得されません。
 

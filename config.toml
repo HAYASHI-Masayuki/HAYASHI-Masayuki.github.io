@@ -26,3 +26,7 @@ widgets = ['ddg-search', 'recent', 'categories', 'taglist', 'social']
 
 [Params.widgets.social]
 github = 'HAYASHI-Masayuki'
+
+[markup.goldmark.renderer]
+unsafe = true
+xhtml = true
