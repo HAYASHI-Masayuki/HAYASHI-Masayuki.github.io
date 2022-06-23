@@ -4,14 +4,16 @@ date: 2022-06-14T17:01:35+09:00
 draft: true
 ---
 
-Laravelのルーティングは基本的な機能で、Eloquentなどと比べるととても小さく、あまり意識せずに使っている人も多いのではないか。しかし実は中心的なRouteファサードが備えるメソッドは40以上と、ほかのファサードと比べてもトップクラスに多い上、そのほとんどがチェーンして使う形になっているため、しっかり理解するのは簡単ではない。
+Laravelのルーティングは基本的な機能で、Eloquentなどと比べるととても小さく、あまり意識せずに使っている人も多いのではないか。しかし実は中心的なRouteファサードが備えるメソッドは40以上と、数あるファサードの中でもトップクラスに多い上、そのほとんどがチェーンして使う形になっているため、意外と複雑だ。
 
 そこでこの記事では、そもそもルーティングとはなにかを考えるところから始めて、Laravelのルート設定のパターンをしっかり把握した上で、具体的な設定機能を理解していく、という流れで説明する。
 
 
 ## 基本的な使い方
 
-まずは基本的な使い方を復習します。ルートの設定には、`Route`ファサードを使います。`get()`や`post()`など、HTTPメソッドと同じ名前のメソッドを使い、URL(パス)のパターンを設定し、そのパスにリクエストされた場合に、どのようなアクションを実行するかを設定します。
+まずは基本的な使い方を復習します。ルートの設定には、一般的には`Route`ファサードを使います。`get()`や`post()`など、HTTPメソッドと同じ名前のメソッドを使い、URL(パス)のパターンを設定し、そのパスにリクエストされた場合に、どのようなアクションを実行するかを設定します。
+
+TODO: routes/web.phpに書くってことも書かないと。
 
 ```php
 <?php
@@ -21,7 +23,7 @@ Route::post('user', [Auth\UserController::class, 'store'])->name('users.store');
 Route::get('user/{user}', [Auth\UserController::class, 'show'])->name('users.show');
 ```
 
-単純なCRUDを実装する場合などは、`resource()`でリソースルートを設定することもできます。CRUDに対応した複数のルートを簡単に、一括で登録できます。
+単純なCRUDを実装する場合などは、`resource()`でリソースルートを設定することもできます。CRUDに対応した複数のルート[^crud]を簡単に、一括で登録できます。
 
 ```php
 <?php
@@ -29,7 +31,7 @@ Route::get('user/{user}', [Auth\UserController::class, 'show'])->name('users.sho
 Route::resource('user', Auth\UserController::class)->only(['create', 'store', 'show']);
 ```
 
-複数のルートをグループとして設定することもできます。
+複数のルートをグループとしてまとめて設定することもできます。複雑なアプリケーションで、コントローラの名前空間が階層分けされている場合などに便利です。
 
 ```php
 <?php
@@ -50,6 +52,7 @@ Route::resource('user', Auth\UserController::class)->only(['create', 'store', 's
 ## ルートはアプリケーションにどう登録されるか、そしてどうマッチングされるか
 
 設定したルートはどうアプリケーションに登録されて、どうマッチングされるか、その流れを見ていきます。
+
 
 ### どう登録されるか
 
@@ -84,6 +87,7 @@ Route::resource('user', Auth\UserController::class)->only(['create', 'store', 's
 
 ここまでの流れで、全体像としてはどう把握すればいいか理解できているはず。ここからは、具体的な機能を確認していく。
 
+
 ### ルートの設定
 
 #### ルートが持つ属性
@@ -108,4 +112,6 @@ Route::resource('user', Auth\UserController::class)->only(['create', 'store', 's
 
 {{< license >}}
 
+
+[^crud]: 具体的にどのようなルートが設定されるかはこちら [コントローラ 9.x Laravel#リソースコントローラにより処理されるアクション](https://readouble.com/laravel/9.x/ja/controllers.html#actions-handled-by-resource-controller)
 
