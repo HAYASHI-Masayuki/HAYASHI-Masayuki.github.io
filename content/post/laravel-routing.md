@@ -11,24 +11,35 @@ Laravelのルーティングは基本的な機能で、Eloquentなどと比べ�
 
 ## 基本的な使い方
 
-まずは基本的な使い方を復習します。ルートの設定には、一般的には`Route`ファサードを使います。`get()`や`post()`など、HTTPメソッドと同じ名前のメソッドを使い、URL(パス)のパターンを設定し、そのパスにリクエストされた場合に、どのようなアクションを実行するかを設定します。
+まずは基本的な使い方を簡単に紹介します。ルートは、デフォルトでは`routes/web.php`に設定します。設定には`Route`ファサードを使います。
 
-TODO: routes/web.phpに書くってことも書かないと。
+一番単純な設定方法では、HTTPメソッドと同じ名前のメソッドを使い、URL(パス)のパターンと、そのパスにアクセスされた場合に行う処理をそれぞれ引数として設定します。
+
+また、以下のように、メソッドチェーンでつなげて`name()`メソッドを呼び出すこともよく行われます。これにより、ルートに名前がつけられ、後でその名前からURLを生成することができます。
 
 ```php
 <?php
 
-Route::get('user/create', [Auth\UserController::class, 'create'])->name('users.create');
-Route::post('user', [Auth\UserController::class, 'store'])->name('users.store');
-Route::get('user/{user}', [Auth\UserController::class, 'show'])->name('users.show');
+use App\Http\Controllers\UserController;
+
+// GETで/user/createにアクセスされた場合に、App\Http\Controllers\UserControllerのcreateメソッドを実行する
+Route::get('user/create', [UserController::class, 'create'])->name('users.create');
+
+// POSTで/userにアクセスされた場合に……
+Route::post('user', [UserController::class, 'store'])->name('users.store');
+
+// GETで/user/1などにアクセスされた場合に……
+Route::get('user/{user}', [UserController::class, 'show'])->name('users.show');
 ```
 
-単純なCRUDを実装する場合などは、`resource()`でリソースルートを設定することもできます。CRUDに対応した複数のルート[^crud]を簡単に、一括で登録できます。
+単純なCRUDを実装する場合には、`resource()`でリソースルートを設定することもできます。CRUDに対応した複数のルート[^crud]を簡単に、一括で登録できます。
+
+`only()`や`except()`で必要なルートのみ設定したり、不要なルートを除外することもできます。
 
 ```php
 <?php
 
-Route::resource('user', Auth\UserController::class)->only(['create', 'store', 'show']);
+Route::resource('user', UserController::class)->only(['create', 'store', 'show']);
 ```
 
 複数のルートをグループとしてまとめて設定することもできます。複雑なアプリケーションで、コントローラの名前空間が階層分けされている場合などに便利です。
@@ -36,7 +47,11 @@ Route::resource('user', Auth\UserController::class)->only(['create', 'store', 's
 ```php
 <?php
 
-// TODO
+Route::name('users.')->group(function () {
+  Route::get('user/create', [UserController::class, 'create'])->name('create');
+  Route::post('user', [UserController::class, 'store'])->name('store');
+  Route::get('user/{user}', [UserController::class, 'show'])->name('show');
+});
 ```
 
 
