@@ -39,20 +39,26 @@ Route::get('user/{user}', [UserController::class, 'show'])->name('users.show');
 ```php
 <?php
 
+use App\Http\Controllers\UserController;
+
 Route::resource('user', UserController::class)->only(['create', 'store', 'show']);
 ```
 
-複数のルートをグループとしてまとめて設定することもできます。複雑なアプリケーションで、コントローラの名前空間が階層分けされている場合などに便利です。
+複数のルートをグループとしてまとめて設定することもできます。グループ内で設定する各ルートにパスや名前の共通のプレフィックスを指定したり、共通のミドルウェアを指定したりできます。
 
 ```php
 <?php
 
-Route::name('users.')->group(function () {
-  Route::get('user/create', [UserController::class, 'create'])->name('create');
-  Route::post('user', [UserController::class, 'store'])->name('store');
-  Route::get('user/{user}', [UserController::class, 'show'])->name('show');
+use App\Http\Controllers\UserController;
+
+Route::prefix('user')->name('users.')->group(function () {
+  Route::get('create', [UserController::class, 'create'])->name('create');
+  Route::post('', [UserController::class, 'store'])->name('store');
+  Route::get('{user}', [UserController::class, 'show'])->name('show');
 });
 ```
+
+上記の3つのサンプルコードは、すべてまったく同じルートを設定します。
 
 
 ## ルーティングとはなにか
