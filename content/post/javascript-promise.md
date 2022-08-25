@@ -49,7 +49,8 @@ console.log(2)
 
 ## Promiseとはなにか
 
-TODO
+* Promiseは、ある関数を非同期に、処理させるためのラッパオブジェクト。
+* ただ非同期にするだけなら、setTimeoutでいいが、後続する処理やエラー処理を簡単に設定できるのが特長。
 
 
 ## async/await
