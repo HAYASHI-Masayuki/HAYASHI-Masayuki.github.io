@@ -24,8 +24,8 @@ draft: true
 * さてそもそもEloquentってなんだろう。Laravelの機能の一つ、データベース操作のためのものだ。
 * Eloquentとは別に、DBファサードから使うクエリビルダもある。なにが違うか？
 * クエリビルダはSQLクエリの組み立て(と実行)だけを行う、責務がはっきりしたモジュール。対してEloquentは、ORMで、「モデル」を通してデータベース処理を行う。
-* 別の視点では、LaravelはRuby on Railsから強く影響を受けており(？)、Eloquentは、RailsのORMであるActive Recordの影響を受けたものだ。
-* Active Recordは、PoEAAにある同名パターンを元にしている(？)
+* 別の視点では、LaravelはRuby on Railsから強く影響を受けており、Eloquentは、RailsのORMであるActive Recordの影響を受けたものだ。[^laravel-inspired-by]
+* Active Recordは、PoEAAにある同名パターンを元にしている。[^active-record-implements-the-patteren]
 
 
 ## Eloquentの全体像
@@ -74,5 +74,13 @@ draft: true
 
 
 {{< license >}}
+
+
+[^laravel-inspired-by]: 以下の記述や、Active Record, Eloquentそれぞれの機能より。
+  "I just wrote the framework I wanted in order to quickly build some business ideas I had. Many of the ideas were a combination of things I picked up from .NET (auto-wiring, reflection based IoC), Sinatra (routing), and Rails (ORM)."
+  [Community Hoops. In this post, I want to reflect a bit… | by Taylor Otwell | Medium](https://medium.com/@taylorotwell/community-hoops-37bd3633114)
+
+[^active-record-implements-the-patteren]: 以下や、前後の記述より。 "It is an implementation of the Active Record pattern ..."
+  [Active Record Basics — Ruby on Rails Guides](https://guides.rubyonrails.org/v7.0/active_record_basics.html)
 
 
