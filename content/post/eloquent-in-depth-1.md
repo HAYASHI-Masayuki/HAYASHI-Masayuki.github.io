@@ -38,6 +38,7 @@ draft: true
 
 ### 特定のテーブル、あるいはその中の特定の行の表現
 
+* の前に、Eloquentの基本的な使い方をおさらいします。
 * Eloquentはクラスとして扱う場合は特定のテーブルを、インスタンスとして扱う場合はその中の特定の行を表現している。
 * DBファサードから使うクエリビルダ、Illuminate\Database\Query\Builder(以下Query\Builder)が単純に一つのSQLクエリを表現しているのに対して、Eloquentのモデルは、上記の通り、特定のテーブルや特定の行を表現する。
 * 事例として、User::whereと$user->whereについて。後者はインスタンスの内容とは無関係であることを。
@@ -64,6 +65,7 @@ draft: true
 
 * モデルはEloquent\Modelを継承する。このEloquent\Modelが最も基本的な要素。
 * Eloquent\Modelは、マジックメソッドを使った委譲によって、Eloquent\Builder, そこからさらに委譲されるQuery\Builderによって、SQL処理を行う。
+* Eloquent\BuilderはQuery\Builderにモデルのテーブルを設定して、使う。
 * その他の機能の多くはEloquent\Model本体と、そこから使用されるトレイトに実装されている。
 * HasAttributesがアトリビュート、アクセサ・ミューテタ、キャストを、
 * HasRelationshipsと、そこで実装されているメソッドから生成される、Eloquent\Relations\Relationを継承した各クラスがリレーションを、
