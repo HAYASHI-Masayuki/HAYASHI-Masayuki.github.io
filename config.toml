@@ -22,7 +22,7 @@ highlightColor = '#66cccc'
 home = 'right'
 list = 'right'
 single = 'right'
-widgets = ['ddg-search', 'recent', 'categories', 'taglist', 'social']
+widgets = ['ddg-search', 'recent', 'categories', 'taglist', 'social', 'others']
 
 [Params.widgets.social]
 github = 'HAYASHI-Masayuki'
