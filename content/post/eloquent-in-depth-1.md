@@ -37,12 +37,58 @@ draft: true
 * またEloquent\Modelを継承したクラスのことを、(Eloquentの)モデルを呼ぶ。
 
 
-### 特定のテーブル、あるいはその中の特定の行の表現
+### Eloquentは特定のテーブルや行の表現
 
-* の前に、Eloquentの基本的な使い方をおさらいします。
-* Eloquentはクラスとして扱う場合は特定のテーブルを、インスタンスとして扱う場合はその中の特定の行を表現している。
-* DBファサードから使うクエリビルダ、Illuminate\Database\Query\Builder(以下Query\Builder)が単純に一つのSQLクエリを表現しているのに対して、Eloquentのモデルは、上記の通り、特定のテーブルや特定の行を表現する。
-* 事例として、User::whereと$user->whereについて。後者はインスタンスの内容とは無関係であることを。
+以下は、Eloquentの基本的な使い方の例です。
+
+```php
+<?php
+
+// 1
+$user = User::find(1);
+
+// 2
+$users = User::where('email', 'like', '%@example.com')->get();
+
+// 3
+echo $user->name;
+
+// 4
+foreach ($user->posts as $post) {
+    echo $post->title;
+}
+```
+
+1では、主キーを指定してユーザを取得しています。2では、特定のパターンにマッチするメールアドレスのユーザをすべて取得しています。
+
+3では、ユーザの名前を出力しています。4では、ユーザと関連する投稿を`foreach`でループしています。
+
+1と2の`User`, 3と4の`$user`がそれぞれ、Eloquentのモデルです。前者はクラスとして使用しており、後者はインスタンスとして使用しています。
+
+これら2つ、クラス`User`とインスタンス`$user`では、表現しているものが違います。クラス`User`は`users`テーブルを表現しています。1も2も、`users`テーブルから条件を指定して、行を取得しているわけです。そして、`$user`が表現しているのは、`users`テーブルから取得した、主キーが`1`である行です。
+
+**Eloquentのモデルは、クラスとして扱う場合は特定のテーブルを、インスタンスとして扱う場合は、その中の特定の行を表現しているというわけです。**
+
+これは重要です。同じデータベースを扱う機能でも、主にDBファサードから使うクエリビルダ、Illuminate\Database\Query\Builder(以下Query\Builder)は単純に一つのSQLクエリを表現しています。
+
+たとえば以下のコードは、`select * from users where id = 1`というSQLクエリをほぼ直接表現していると考えてよいでしょう。
+
+```php
+<?php
+
+DB::table('users')->find(1);
+```
+
+一方で`User::find(1)`は、基本的には同じクエリが発行されますが、以下の点がQuery\Builderのコードと違います。
+
+1. `User`モデルは自身と対応するテーブルの名前を知っています。
+2. `User`モデルはまた、そのテーブルの主キーの名前を知っています。
+
+これにより、Eloquentのモデルは、テーブル名を指定しなくても対応するテーブルに対するクエリを実行できますし、主キーが`'id'`以外の場合も`find`を使えます。[^query-builder-find-uses-only-id]
+
+とはいえこれがEloquentの利点というわけではありません。単純にQuery\BuilderとEloquentのモデルでは、表現するものが違うというだけの話です。
+
+この違いを知ることが、Eloquentの深い理解の第一歩です。
 
 
 ### 具体的な構成要素
@@ -92,5 +138,8 @@ draft: true
 [^active-record-implements-the-patteren]: 以下や、前後の記述より。
   "It is an implementation of the Active Record pattern ..."
   [Active Record Basics — Ruby on Rails Guides](https://guides.rubyonrails.org/v7.0/active_record_basics.html)
+
+[^query-builder-find-uses-only-id]: Query\Builderの`find`は、主キーを決め打ちしているため、主キーの名前が`'id'`以外のテーブルでは使えません。
+  [framework/Builder.php at 9.x · laravel/framework](https://github.com/laravel/framework/blob/a3c3ed5e8af02e81756b7e51a1a60ad23a600a23/src/Illuminate/Database/Query/Builder.php#L2554)
 
 
