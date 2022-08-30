@@ -1,5 +1,5 @@
 ---
-title: "Eloquentを深く理解する (1) Eloquentの全体像"
+title: "Eloquentを深く理解する (1) 全体像の把握"
 date: 2022-08-25T19:24:51+09:00
 draft: true
 ---
@@ -7,6 +7,7 @@ draft: true
 ## はじめに
 
 * これから、Eloquentを深く理解するための記事を書いていくよ。
+* 対象読者は、普段Laravel, Eloquentを普通に使っているが、いざドキュメントにないこと、その他ややこしいことを調べようとすると、なかなかスムーズに行かない、くらいのレベルの人。
 * 1回目は全体像から。Eloquentは巨大なモジュールだから、まず大まかに全体像を把握してからじゃないと大変かと。
 * その後、クエリビルダ、アトリビュート、リレーション、などなど、重要な機能を一つずつ見ていくよ。
 
@@ -63,7 +64,7 @@ draft: true
 
 ### 物理的な構成
 
-* モデルはEloquent\Modelを継承する。このEloquent\Modelが最も基本的な要素。
+* すでに話したように、モデルはEloquent\Modelを継承する。このEloquent\Modelが最も基本的な要素。
 * Eloquent\Modelは、マジックメソッドを使った委譲によって、Eloquent\Builder, そこからさらに委譲されるQuery\Builderによって、SQL処理を行う。
 * Eloquent\BuilderはQuery\Builderにモデルのテーブルを設定して、使う。
 * その他の機能の多くはEloquent\Model本体と、そこから使用されるトレイトに実装されている。
@@ -71,6 +72,14 @@ draft: true
 * HasRelationshipsと、そこで実装されているメソッドから生成される、Eloquent\Relations\Relationを継承した各クラスがリレーションを、
 * その他あれこれ。
 * なお、物理的な構成はバージョンによって大きく変わるので注意。
+
+
+## 目次
+
+1. [クエリビルダ](../eloquent-in-depth-2/)
+2. [アトリビュート](../eloquent-in-depth-3/)
+3. [リレーション](../eloquent-in-depth-4/)
+4. [その他の機能](../eloquent-in-depth-5/)
 
 
 {{< license >}}
