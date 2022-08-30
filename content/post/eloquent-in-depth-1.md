@@ -80,7 +80,8 @@ draft: true
   "I just wrote the framework I wanted in order to quickly build some business ideas I had. Many of the ideas were a combination of things I picked up from .NET (auto-wiring, reflection based IoC), Sinatra (routing), and Rails (ORM)."
   [Community Hoops. In this post, I want to reflect a bit… | by Taylor Otwell | Medium](https://medium.com/@taylorotwell/community-hoops-37bd3633114)
 
-[^active-record-implements-the-patteren]: 以下や、前後の記述より。 "It is an implementation of the Active Record pattern ..."
+[^active-record-implements-the-patteren]: 以下や、前後の記述より。
+  "It is an implementation of the Active Record pattern ..."
   [Active Record Basics — Ruby on Rails Guides](https://guides.rubyonrails.org/v7.0/active_record_basics.html)
 
 
