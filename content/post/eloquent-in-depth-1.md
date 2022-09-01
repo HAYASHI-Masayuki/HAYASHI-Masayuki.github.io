@@ -112,6 +112,7 @@ DB::table('users')->find(1);
 
 * すでに話したように、モデルはEloquent\Modelを継承する。このEloquent\Modelが最も基本的な要素。
 * Eloquent\Modelは、マジックメソッドを使った委譲によって、Eloquent\Builder, そこからさらに委譲されるQuery\Builderによって、SQL処理を行う。
+  * ここで、Model::methodがstaticから通常のメソッド呼んでどうこう、からのUser::where, $user->where, で、クラスはテーブル、インスタンスは行、である話に。
 * Eloquent\BuilderはQuery\Builderにモデルのテーブルを設定して、使う。
 * その他の機能の多くはEloquent\Model本体と、そこから使用されるトレイトに実装されている。
 * HasAttributesがアトリビュート、アクセサ・ミューテタ、キャストを、
