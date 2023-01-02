@@ -13,7 +13,7 @@ VS Codeにはお手軽な操作でMarkdownで書いた文書をPDF等に出力�
 
 ```css
 body {
-  count-column: 2;
+  column-count: 2;
 }
 ```
 
