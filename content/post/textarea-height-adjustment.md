@@ -11,8 +11,8 @@ draft: false
 
 肝は2点、
 
-1. 内容の高さは`scrollHeight`として取得できるので、それと内容以外の高さを計算して`textarea`の`height`を設定すれば、適切な高さになる。
-2. 内容以外の高さを計算するには、`box-sizing`次第で`border`か`padding`の高さを計算する必要がある。
+1. 内容の高さ + `padding`の高さは`scrollHeight`として取得できるので、それと内容以外の高さを計算して`textarea`の`height`を設定すれば、適切な高さになる。
+2. `height`として設定すべき値は`border-box`であれば「内容の高さ + `padding`の高さ + `border`の高さ」、`content-box`であれば「内容の高さ」となる。
 
 たったこれだけの話だったのですが、答えに辿り着くまでに結構かかりました。HTML/CSS力がまだまだ足りません。
 
@@ -31,23 +31,32 @@ draft: false
       }
     </style>
     <script>
-      const getTextAreaOuterHeight = (textarea) => {
+      const getTextAreaHeightForBorderBox = (textarea) => {
         const style = getComputedStyle(textarea)
 
-        // ここが重要で、border-box(texteareaではデフォルト)の場合は「ちょうど」の
-        // 高さは内容の高さ + ボーダーの高さだが、content-boxの場合は内容の高さ -
-        // パディングの高さ、となる。
-        return style.boxSizing === 'border-box'
-          ? parseInt(style.borderTopWidth) + parseInt(style.borderBottomWidth)
-          : - (parseInt(style.paddingTop) + parseInt(style.paddingBottom))
+        // border-boxの高さは、内容の高さ + paddingの高さ + borderの高さ
+        // scrollHeightは内容の高さ + paddingの高さなので、
+        return parseInt(textarea.scrollHeight) + parseInt(style.borderTopWidth) + parseInt(style.borderBottomWidth)
+      }
+
+      const getTextAreaHeightForContentBox = (textarea) => {
+        const style = getComputedStyle(textarea)
+
+        // content-boxの高さは、内容の高さ
+        // scrollHeightは内容の高さ + paddingの高さなので、
+        return parseInt(textarea.scrollHeight) - (parseInt(style.paddingTop) + parseInt(style.paddingBottom))
       }
 
       const adjustTextAreaHeight = (textarea) => {
         // 一度リセットしないと、scrollHeightが縮まない
         textarea.style.height = 0
 
-        // テキストエリアの高さ = 内容の高さ + 内容以外の高さとする
-        textarea.style.height = (parseInt(textarea.scrollHeight) + getTextAreaOuterHeight(textarea)) + 'px'
+        // テキストエリアの隠れている部分も含めた高さを取得・設定する
+        textarea.style.height = (
+          textarea.style.boxSizing === 'border-box'
+            ? getTextAreaHeightForBorderBox(textarea)
+            : getTextAreaHeightForContentBox(textarea)
+        ) + 'px'
       }
 
       // 後は必要なタイミングで調整するよう設定する
@@ -64,6 +73,8 @@ draft: false
   </body>
 </html>
 ```
+
+なおこのサンプルコードは`box-sizing`がどちらでも自動で対応しますが、通常はどちらかで固定にしていることが多いと思われ、その場合はさらにシンプルな実装になるかと思われます。
 
 
 {{< license >}}
