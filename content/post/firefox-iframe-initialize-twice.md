@@ -1,7 +1,7 @@
 ---
 title: "Firefoxはiframeを二回初期化するため、contentDocumentを触る場合は待つ必要がある"
 date: 2024-05-23T20:41:11+09:00
-draft: true
+draft: false
 ---
 
 あるHTMLドキュメント上に、隔離された別のHTMLドキュメントを生成したい場合に、iframeを使うことがあります。最近は、Shadow DOMでも実現できそうですが。
