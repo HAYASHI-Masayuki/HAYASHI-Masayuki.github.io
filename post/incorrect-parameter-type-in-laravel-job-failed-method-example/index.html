@@ -1,0 +1,83 @@
+<!doctype html><html class=no-js lang=ja><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=x-ua-compatible content="IE=edge"><title>長期間(6以前から)運用されているLaravelシステムがあるなら、ジョブのコードを一度確認した方がいいかもしれない - 表現と向上</title><script>(function(a,b){a[b]=a[b].replace("no-js","js")})(document.documentElement,"className")</script><meta name=description content><meta property="og:title" content="長期間(6以前から)運用されているLaravelシステムがあるなら、ジョブのコードを一度確認した方がいいかもしれない"><meta property="og:description" content="Laravelのジョブクラスのfailedメソッドの実行に失敗する Laravelのジョブクラスには、failedというメソッドを実装すること"><meta property="og:type" content="article"><meta property="og:url" content="https://hayashi-masayuki.github.io/post/incorrect-parameter-type-in-laravel-job-failed-method-example/"><meta property="article:section" content="post"><meta property="article:published_time" content="2024-09-05T20:45:11+09:00"><meta property="article:modified_time" content="2024-09-05T21:16:11+09:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="長期間(6以前から)運用されているLaravelシステムがあるなら、ジョブのコードを一度確認した方がいいかもしれない"><meta name=twitter:description content="Laravelのジョブクラスのfailedメソッドの実行に失敗する Laravelのジョブクラスには、failedというメソッドを実装すること"><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=dns-prefetch href=//fonts.googleapis.com><link rel=dns-prefetch href=//fonts.gstatic.com><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700"><link rel=stylesheet href=/css/style.css><link rel="shortcut icon" href=/favicon.ico><script data-goatcounter=https://hayashi-masayuki.goatcounter.com/count async src=//gc.zgo.at/count.js></script></head><body class=body><div class="container container--outer"><header class=header><div class="container header__container"><div class=logo><a class=logo__link href=/ title=表現と向上 rel=home><div class="logo__item logo__text"><div class=logo__title>表現と向上</div></div></a></div><div class=divider></div></div></header><div class="wrapper flex"><div class=primary><main class=main role=main><article class=post><header class=post__header><h1 class=post__title>長期間(6以前から)運用されているLaravelシステムがあるなら、ジョブのコードを一度確認した方がいいかもしれない</h1><div class="post__meta meta"><div class="meta__item-datetime meta__item"><svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg><time class=meta__text datetime=2024-09-05T20:45:11+09:00>2024/09/05</time></div></div></header><div class="post__toc toc"><div class=toc__title>目次</div><div class=toc__menu><nav id=TableOfContents><ul><li><a href=#laravelのジョブクラスのfailedメソッドの実行に失敗する>Laravelのジョブクラスの<code>failed</code>メソッドの実行に失敗する</a></li><li><a href=#原因究明>原因究明</a></li><li><a href=#原因は公式ドキュメントの間違えをそのままコピペしたため>原因は公式ドキュメントの間違えを、そのままコピペしたため</a></li><li><a href=#まとめ>まとめ</a></li></ul></nav></div></div><div class="content post__content clearfix"><h2 id=laravelのジョブクラスのfailedメソッドの実行に失敗する>Laravelのジョブクラスの<code>failed</code>メソッドの実行に失敗する</h2><p>Laravelのジョブクラスには、<code>failed</code>というメソッドを実装することで、失敗時の処理を定義できます。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-php data-lang=php><span style=color:#f92672>&lt;?</span><span style=color:#a6e22e>php</span>
+
+<span style=color:#66d9ef>namespace</span> <span style=color:#a6e22e>App\Jobs</span>;
+
+<span style=color:#75715e>// ...
+</span><span style=color:#75715e></span>
+<span style=color:#66d9ef>class</span> <span style=color:#a6e22e>FooJob</span> <span style=color:#66d9ef>implements</span> <span style=color:#a6e22e>ShouldQueue</span>
+{
+    <span style=color:#75715e>// ...
+</span><span style=color:#75715e></span>
+    <span style=color:#e6db74>/**
+</span><span style=color:#e6db74>     * The job failed to process.
+</span><span style=color:#e6db74>     *
+</span><span style=color:#e6db74>     * @param  Exception  $exception
+</span><span style=color:#e6db74>     * @return void
+</span><span style=color:#e6db74>     */</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>failed</span>(<span style=color:#a6e22e>Exception</span> $exception)
+    {
+        <span style=color:#75715e>// 失敗時に実行される
+</span><span style=color:#75715e></span>    }
+}
+</code></pre></div><p>最近、この<code>failed</code>メソッドの実行自体がエラーになることがありました。</p><pre><code>Argument #1 ($exception) must be of type Exception, TypeError given, ...
+</code></pre><p>確認すると、原因は単なる引数の型の間違えでした。上記のように<code>Exception</code>を受け取っていたのですが、実際に渡されたのは<code>TypeError</code>でした。</p><p>ご存知のように、PHPの例外は以下のようなツリー構造になっています。</p><pre><code>- Throwable
+  - Error
+    - TypeError
+    ...
+  - Exception
+    ...
+</code></pre><p><code>TypeError</code>は<code>Error</code>のサブクラスであり、<code>Exception</code>のサブクラスではないので、<code>failed</code>の実行が失敗するのは当然です。</p><h2 id=原因究明>原因究明</h2><p>しかしさて、なぜ<code>failed</code>の第1引数を<code>Exception</code>として実装してしまったのでしょうか。原因を探ってみました。</p><ol><li>まず、この<code>failed</code>は、<code>artisan make:job</code>で用意されるものではなさそうでした。</li><li>その他、コード内のなにかを元にしたわけではなさそうでした。Laravelのジョブクラスは親クラスを継承して作るような仕様ではないので、親クラスの<code>failed</code>を持って来た、という可能性はありません。</li><li>元々<code>failed</code>は<code>Exception</code>を受け取る仕様であり、途中でそれが変わった可能性を考え、コミットログやアップグレードガイドをざっと見ましたが、その限りでは元々<code>Throwable</code>を受け取る仕様だったようです。</li><li>公式ドキュメントに<code>failed</code>の実装例はありました。が、型は正しく<code>Throwable</code>でした。</li></ol><p>とりあえずここまで来て思い付くことがあり、古いバージョンのドキュメントを確認すると、そこには第1引数が<code>Exception</code>になっている実装例がありました。これをコピペしたのが原因と考えてよさそうです。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-php data-lang=php><span style=color:#f92672>&lt;?</span><span style=color:#a6e22e>php</span>
+ 
+<span style=color:#66d9ef>namespace</span> <span style=color:#a6e22e>App\Jobs</span>;
+ 
+<span style=color:#66d9ef>use</span> <span style=color:#a6e22e>Exception</span>;
+<span style=color:#66d9ef>use</span> <span style=color:#a6e22e>App\Podcast</span>;
+<span style=color:#66d9ef>use</span> <span style=color:#a6e22e>App\AudioProcessor</span>;
+<span style=color:#66d9ef>use</span> <span style=color:#a6e22e>Illuminate\Bus\Queueable</span>;
+<span style=color:#66d9ef>use</span> <span style=color:#a6e22e>Illuminate\Queue\SerializesModels</span>;
+<span style=color:#66d9ef>use</span> <span style=color:#a6e22e>Illuminate\Queue\InteractsWithQueue</span>;
+<span style=color:#66d9ef>use</span> <span style=color:#a6e22e>Illuminate\Contracts\Queue\ShouldQueue</span>;
+ 
+<span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ProcessPodcast</span> <span style=color:#66d9ef>implements</span> <span style=color:#a6e22e>ShouldQueue</span>
+{
+    <span style=color:#66d9ef>use</span> <span style=color:#a6e22e>InteractsWithQueue</span>, <span style=color:#a6e22e>Queueable</span>, <span style=color:#a6e22e>SerializesModels</span>;
+ 
+    <span style=color:#66d9ef>protected</span> $podcast;
+ 
+    <span style=color:#e6db74>/**
+</span><span style=color:#e6db74>     * Create a new job instance.
+</span><span style=color:#e6db74>     *
+</span><span style=color:#e6db74>     * @param  Podcast  $podcast
+</span><span style=color:#e6db74>     * @return void
+</span><span style=color:#e6db74>     */</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>function</span> __construct(<span style=color:#a6e22e>Podcast</span> $podcast)
+    {
+        $this<span style=color:#f92672>-&gt;</span><span style=color:#a6e22e>podcast</span> <span style=color:#f92672>=</span> $podcast;
+    }
+ 
+    <span style=color:#e6db74>/**
+</span><span style=color:#e6db74>     * Execute the job.
+</span><span style=color:#e6db74>     *
+</span><span style=color:#e6db74>     * @param  AudioProcessor  $processor
+</span><span style=color:#e6db74>     * @return void
+</span><span style=color:#e6db74>     */</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>handle</span>(<span style=color:#a6e22e>AudioProcessor</span> $processor)
+    {
+        <span style=color:#75715e>// Process uploaded podcast...
+</span><span style=color:#75715e></span>    }
+ 
+    <span style=color:#e6db74>/**
+</span><span style=color:#e6db74>     * The job failed to process.
+</span><span style=color:#e6db74>     *
+</span><span style=color:#e6db74>     * @param  Exception  $exception
+</span><span style=color:#e6db74>     * @return void
+</span><span style=color:#e6db74>     */</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>failed</span>(<span style=color:#a6e22e>Exception</span> $exception)
+    {
+        <span style=color:#75715e>// Send user notification of failure, etc...
+</span><span style=color:#75715e></span>    }
+}
+</code></pre></div><p><a href=https://laravel.com/docs/5.3/queues#cleaning-up-after-failed-jobs>Queues - Laravel 5.3 - The PHP Framework For Web Artisans</a></p><h2 id=原因は公式ドキュメントの間違えをそのままコピペしたため>原因は公式ドキュメントの間違えを、そのままコピペしたため</h2><p>公式ドキュメントの<code>failed</code>の実装例は何度か修正されており、5.3で引数を受け取るようになってから6までの間は、間違った<code>Exception</code>を受け取っていました。これは、以下のPRで修正され、7以降のドキュメントでは<code>Throwable</code>になっています。</p><p><a href=https://github.com/laravel/docs/pull/6253>[7.x] Use Throwable instead of Exception in failed() methods in code examples by LeoNguyenHQ · Pull Request #6253 · laravel/docs</a></p><p>さらに10で、引数がnullableに修正されています。</p><p><a href=https://github.com/laravel/docs/pull/9445>[10.x] Nullable <code>failed</code> method by timacdonald · Pull Request #9445 · laravel/docs</a></p><h2 id=まとめ>まとめ</h2><p>ドキュメントの変更履歴がこうして残っているのは、やはり便利です。変更履歴や、そもそも古いバージョンのドキュメントが残っていなければ、原因究明は難しかったでしょう。</p><p>一方、コードであれば重要な修正はそれ自体がドキュメントにされやすいですが、ドキュメントの重要な修正がドキュメントにされるようなことはあまりなさそうで、ここは改善の余地がありそうです。</p><p>古くからあるジョブクラスの<code>failed</code>メソッドの引数の型は、一度確認してみてもいいかもしれません。</p><h2 id=license>この記事のライセンス</h2><p><img alt=クリエイティブ・コモンズ・ライセンス src=https://i.creativecommons.org/l/by/4.0/88x31.png></p><p>この文書は<a href=http://creativecommons.org/licenses/by/4.0/>CC BY(クリエイティブ・コモンズ表示4.0国際ライセンス)</a>で公開します。</p></div></article></main><nav class="pager flex"><div class="pager__item pager__item--prev"><a class=pager__link href=/post/global-git-hooks/ rel=prev><span class=pager__subtitle>«&#8201;前の投稿</span><p class=pager__title>Gitフックをグローバルに設定可能にする</p></a></div></nav></div><aside class=sidebar><div class="widget-search widget"><form class=widget-search__form role=search method=get action=https://duckduckgo.com/><label><input class=widget-search__field type=search placeholder=検索… name=q aria-label=検索…></label>
+<input class=widget-search__submit type=submit value=Search>
+<input type=hidden name=sites value=https://hayashi-masayuki.github.io/></form></div><div class="widget-recent widget"><h4 class=widget__title>最近の投稿</h4><div class=widget__content><ul class=widget__list><li class=widget__item><a class=widget__link href=/post/incorrect-parameter-type-in-laravel-job-failed-method-example/>長期間(6以前から)運用されているLaravelシステムがあるなら、ジョブのコードを一度確認した方がいいかもしれない</a></li><li class=widget__item><a class=widget__link href=/post/global-git-hooks/>Gitフックをグローバルに設定可能にする</a></li><li class=widget__item><a class=widget__link href=/post/show-logs-in-git-commit-editmsg/>Gitのコミットメッセージ編集ファイルに最近のコミットメッセージを表示する</a></li><li class=widget__item><a class=widget__link href=/post/use-purgecss-with-svelte-and-vite/>Svelte + Vite環境でPurgeCSSを使う方法</a></li><li class=widget__item><a class=widget__link href=/post/firefox-iframe-initialize-twice/>Firefoxはiframeを二回初期化するため、contentDocumentを触る場合は待つ必要がある</a></li><li class=widget__item><a class=widget__link href=/post/textarea-height-adjustment/>テキストエリアの高さを内容に合わせて自動でリサイズするおそらくベストな方法</a></li><li class=widget__item><a class=widget__link href=/post/how-i-write-commit-messages/>私のコミットメッセージの書き方</a></li><li class=widget__item><a class=widget__link href=/post/vscode-markdown-pdf-multi-column/>VS CodeのMarkdown PDF拡張で、2カラムのPDFを出力する</a></li><li class=widget__item><a class=widget__link href=/post/laravel-database-chunk-trap/>Laravelのデータベースのchunk()の罠</a></li></ul></div></div><div class="widget-social widget"><h4 class="widget-social__title widget__title">ソーシャル</h4><div class="widget-social__content widget__content"><div class="widget-social__item widget__item"><a class="widget-social__link widget__link btn" title=Twitter rel="noopener noreferrer" href=https://twitter.com/hayashi_msyk target=_blank><svg class="widget-social__link-icon icon icon-twitter" width="24" height="24" viewBox="0 0 384 312"><path d="m384 36.9c-14.1 6.3-29.3 10.5-45.2 12.4 16.3-9.7 28.8-25.2 34.6-43.6-15.2 9-32.1 15.6-50 19.1-14.4-15.2-34.9-24.8-57.5-24.8-43.5.0-78.8 35.3-78.8 78.8.0 6.2.7 12.2 2 17.9-65.5-3.3-123.5-34.6-162.4-82.3C20 26 16.1 39.6 16.1 54c0 27.3 13.9 51.4 35 65.6-12.9-.4-25.1-4-35.7-9.9v1c0 38.2 27.2 70 63.2 77.2-6.6 1.8-13.6 2.8-20.8 2.8-5.1.0-10-.5-14.8-1.4 10 31.3 39.1 54.1 73.6 54.7-27 21.1-60.9 33.7-97.8 33.7-6.4.0-12.6-.4-18.8-1.1C34.9 299 76.3 312 120.8 312c144.9.0 224.1-120 224.1-224.1.0-3.4-.1-6.8-.2-10.2 15.4-11.1 28.7-25 39.3-40.8z"/></svg><span>Twitter</span></a></div><div class="widget-social__item widget__item"><a class="widget-social__link widget__link btn" title=GitHub rel="noopener noreferrer" href=https://github.com/HAYASHI-Masayuki target=_blank><svg class="widget-social__link-icon icon icon-github" width="24" height="24" viewBox="0 0 384 374"><path d="m192 0C85.9.0.0 85.8.0 191.7c0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2.0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8.0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7.0.0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4.0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5.0 25.6-.2 46.3-.2 52.6.0 5.1 3.5 11.1 13.2 9.2C329 348.2 384 276.4 384 191.7 384 85.8 298 0 192 0z"/></svg><span>GitHub</span></a></div></div></div><div class="widget-text widget"><h4 class=widget__title>その他</h4><nav class=widget__content><ul class=widget__list><li><a href=https://github.com/HAYASHI-Masayuki/HAYASHI-Masayuki.github.io>このブログのリポジトリ</a></li><li><a href=/phpcon-okinawa-2022-all-eloquent/>PHPカンファレンス沖縄2022スライド</a></li></ul></nav></div></aside></div><footer class=footer><div class="container footer__container flex"><div class=footer__copyright>&copy; 2024 HAYASHI Masayuki.
+<span class=footer__copyright-credits>このサイトは <a href=https://gohugo.io/ rel="nofollow noopener" target=_blank>Hugo</a> と <a href=https://github.com/Vimux/Mainroad/ rel="nofollow noopener" target=_blank>Mainroad</a> テーマで生成されています。</span></div></div></footer></div><script async defer src=/js/menu.js></script></body></html>
